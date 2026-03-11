@@ -52,6 +52,7 @@ begin
     WriteLn('Error:'+ e.Message);
     end;
   end;
+  Writeln('Press any key to exit.');
   ReadLn;
   Shutdown();
 end.
