@@ -16,9 +16,6 @@
 extern "C" {
 #endif
 
-// simple math example (kept for compatibility)
-DELPHI_API int DELPHI_CALL Add(int a, int b);
-
 // init/shutdown of the library
 DELPHI_API void DELPHI_CALL Initialize();
 DELPHI_API void DELPHI_CALL Shutdown();

@@ -8,11 +8,6 @@ static PlayerState* g_player = nullptr;
 
 // Sample implementations
 extern "C" {
-    DELPHI_API int DELPHI_CALL Add(int a, int b)
-    {
-        return a + b;
-    }
-
     DELPHI_API void DELPHI_CALL Initialize()
     {
         std::cout << "Delphi DLL initialized\n";
