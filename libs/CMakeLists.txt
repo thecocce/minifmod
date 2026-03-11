@@ -3,6 +3,7 @@
 add_subdirectory ("minifmod")
 add_subdirectory ("minixm")
 add_subdirectory ("xmformat")
+add_subdirectory ("delphi")
 
 if(WIN32)
 add_subdirectory ("winmm_playback")

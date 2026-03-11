@@ -1,5 +1,60 @@
 # minifmod
 
+## Delphi stdcall DLL
+
+A new library target `delphi_dll` is added under `libs/delphi`. It builds a
+Windows `DLL` exporting C-style `__stdcall` functions that can be called from
+Delphi or other languages using the StdCall convention.  The exports are
+controlled via `delphi.def` so the names are not decorated.
+
+### Building
+
+```powershell
+cmake -S . -B out/build -G "Visual Studio 17 2022" -A x64
+cmake --build out/build --config Release --target delphi_dll
+```
+
+The resulting DLL will be named `minifmod_delphi.dll`.
+
+### Example Delphi usage
+
+```pascal
+library DelphiTest;
+
+uses
+  SysUtils, Windows;
+
+var
+  Add: function(a, b: Integer): Integer; stdcall;
+  Initialize: procedure; stdcall;
+  Shutdown: procedure; stdcall;
+  AudioInit: function(rate: Integer): LongBool; stdcall;
+  AudioPlay: function(filename: PAnsiChar): LongBool; stdcall;
+  AudioStop: procedure; stdcall;
+
+begin
+  @Add := GetProcAddress(GetModuleHandle('minifmod_delphi.dll'), 'Add');
+  @Initialize := GetProcAddress(GetModuleHandle('minifmod_delphi.dll'), 'Initialize');
+  @Shutdown := GetProcAddress(GetModuleHandle('minifmod_delphi.dll'), 'Shutdown');
+  @AudioInit := GetProcAddress(GetModuleHandle('minifmod_delphi.dll'), 'AudioInit');
+  @AudioPlay := GetProcAddress(GetModuleHandle('minifmod_delphi.dll'), 'AudioPlay');
+  @AudioStop := GetProcAddress(GetModuleHandle('minifmod_delphi.dll'), 'AudioStop');
+
+  Initialize();
+  if AudioInit(44100) then
+  begin
+    if AudioPlay('demo.xm') then
+    begin
+      Sleep(5000);
+      AudioStop();
+    end;
+  end;
+  Shutdown();
+end.
+```
+
+---
+
 MiniFMOD 2.2.0 C++ version
 
 Copyright Firelight Technologies, 1999-2003.

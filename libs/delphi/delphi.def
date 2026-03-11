@@ -1,0 +1,5 @@
+LIBRARY "minifmod_delphi"
+EXPORTS
+    Add
+    Initialize
+    Shutdown
