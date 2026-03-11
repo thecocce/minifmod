@@ -7,22 +7,23 @@ uses
 {$APPTYPE CONSOLE}
 
 var
-  AudioInit: function(rate: Integer): LongBool; stdcall;
-  AudioPlay: function(filename: PAnsiChar): LongBool; stdcall;
-  AudioStop: procedure; stdcall;
-  Initialize: procedure; stdcall;
-  Shutdown: procedure; stdcall;
+  AudioInit: function(rate: Integer): LongBool; cdecl;
+  AudioPlay: function(filename: PAnsiChar): LongBool; cdecl;
+  AudioStop: procedure; cdecl;
+  Initialize: procedure; cdecl;
+  Shutdown: procedure; cdecl;
 
 const
   DLL_NAME = 'minifmod_delphi.dll';
 
+var
+  hDLL: THandle;
+
 begin
 
-  var fe := FileExists(DLL_NAME);
-
-
   try
-    if not LoadLibrary(DLL_NAME) <> 0 then
+    hDLL := LoadLibrary(DLL_NAME);
+    if hDLL = 0 then
       raise Exception.Create('Failed to load ' + DLL_NAME);
 
     @AudioInit := GetProcAddress(GetModuleHandle(DLL_NAME), 'AudioInit');
