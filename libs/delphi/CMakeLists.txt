@@ -15,10 +15,13 @@ target_compile_definitions(delphi_dll PRIVATE DELPHI_DLL_EXPORTS)
 
 target_include_directories(delphi_dll PRIVATE
     ${CMAKE_SOURCE_DIR}/libs/minifmod/include
+    ${CMAKE_SOURCE_DIR}/libs/minixm/include
 )
 
 # Link against in-tree minifmod and its dependencies
 target_link_libraries(delphi_dll PRIVATE minifmod)
+
+set_property(TARGET delphi_dll PROPERTY CXX_STANDARD 20)
 
 # On Windows, add linker flag to use definition file (already included above as source)
 if(MSVC)

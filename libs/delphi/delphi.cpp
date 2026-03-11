@@ -1,7 +1,32 @@
 #include "delphi.h"
 #include <iostream>
+#include <cstdio>
 
 #include <minifmod/minifmod.h>
+#include <minixm/system_file.h>  // for access to minifmod::file_access
+
+// simple file callbacks that mimic example app
+static void* df_fileopen(const char* name)
+{
+    return fopen(name, "rb");
+}
+static void df_fileclose(void* handle)
+{
+    fclose((FILE*)handle);
+}
+static size_t df_fileread(void* buffer, size_t size, void* handle)
+{
+    return fread(buffer, 1, size, (FILE*)handle);
+}
+static void df_fileseek(void* handle, long pos, int mode)
+{
+    fseek((FILE*)handle, pos, mode);
+}
+static long df_filetell(void* handle)
+{
+    return ftell((FILE*)handle);
+}
+
 
 static bool g_audio_inited = false;
 static PlayerState* g_player = nullptr;
@@ -29,18 +54,49 @@ extern "C" {
     {
         if (g_audio_inited)
             return true;
-        g_audio_inited = FSOUND_Init(mixrate);
-        return g_audio_inited;
+        // ensure file access callbacks are configured
+        if (!minifmod::file_access.open)
+        {
+            minifmod::file_access.open  = df_fileopen;
+            minifmod::file_access.close = df_fileclose;
+            minifmod::file_access.read  = df_fileread;
+            minifmod::file_access.seek  = df_fileseek;
+            minifmod::file_access.tell  = df_filetell;
+        }
+
+        bool ok = FSOUND_Init(mixrate);
+        g_audio_inited = ok;
+        std::cout << "AudioInit(" << mixrate << ") returned " << ok << "\n";
+        return ok;
     }
 
     DELPHI_API bool DELPHI_CALL AudioPlay(const char* filename)
     {
         if (!g_audio_inited)
             return false;
-        Module* mod = FMUSIC_LoadSong(filename, nullptr);
-        if (!mod)
+        if (!filename)
+        {
+            std::cerr << "AudioPlay called with null filename\n";
             return false;
+        }
+        // copy filename to safeguard against invalid pointers from caller
+        std::string fname(filename);
+        std::cout << "AudioPlay: " << fname << "\n";
+        std::cout << "-> calling FMUSIC_LoadSong\n";
+        Module* mod = FMUSIC_LoadSong(fname.c_str(), nullptr);
+        std::cout << "   FMUSIC_LoadSong returned " << mod << "\n";
+        if (!mod)
+        {
+            std::cerr << "FMUSIC_LoadSong failed for " << fname << "\n";
+            return false;
+        }
+        std::cout << "-> calling FMUSIC_PlaySong\n";
         g_player = FMUSIC_PlaySong(mod);
+        std::cout << "   FMUSIC_PlaySong returned " << g_player << "\n";
+        if (!g_player)
+        {
+            std::cerr << "FMUSIC_PlaySong returned null\n";
+        }
         return g_player != nullptr;
     }
 
